@@ -1,0 +1,210 @@
+<html lang="en"><head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Klasifikasi Berita Hoax</title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="static/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="static/vendors/base/vendor.bundle.base.css">
+    <!-- endinject -->
+    <!-- plugin css for this page -->
+    <link rel="stylesheet" href="static/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
+    <!-- End plugin css for this page -->
+    <!-- inject:css -->
+    <link rel="stylesheet" href="static/css/style.css">
+    <!-- endinject -->
+    <!-- <link rel="shortcut icon" href="static/images/favicon.png"> -->
+  <style type="text/css">/* Chart.js */
+  @keyframes chartjs-render-animation{from{opacity:.99}to{opacity:1}}.chartjs-render-monitor{animation:chartjs-render-animation 1ms}.chartjs-size-monitor,.chartjs-size-monitor-expand,.chartjs-size-monitor-shrink{position:absolute;direction:ltr;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1}.chartjs-size-monitor-expand>div{position:absolute;width:1000000px;height:1000000px;left:0;top:0}.chartjs-size-monitor-shrink>div{position:absolute;width:200%;height:200%;left:0;top:0}</style></head>
+  <body>
+    <div class="container-scroller">
+      <!-- partial:partials/_navbar.html -->
+      <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+        <div class="navbar-brand-wrapper d-flex justify-content-center">
+          <div style="margin-left:15px" class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">  
+            <a style="font-size:1em" class="navbar-brand brand-logo" href="index.html">Klasifikasi Berita Hoax
+  </a>
+            <a class="navbar-brand brand-logo-mini" style="font-size:13px" href="index.html">...</a>
+            <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+              <span class="mdi mdi-sort-variant"></span>
+            </button>
+          </div>  
+        </div>
+        <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+          
+          <ul class="navbar-nav navbar-nav-right">
+            
+            
+            <li class="nav-item nav-profile dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown" aria-expanded="false">
+                
+                <span class="nav-profile-name">{{nama}}</span>
+              </a>
+              <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
+                
+                <a  href="logout" class="dropdown-item">
+                  <i class="mdi mdi-logout text-primary"></i>
+                  Logout
+                </a>
+              </div>
+            </li>
+          </ul>
+          <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+            <span class="mdi mdi-menu"></span>
+          </button>
+        </div>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        {%with selected='pengujian'%}
+            {%include 'Sidebar.html'%}
+      {%endwith%}
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            
+            <div class="row">
+              <div class="col-md-12 grid-margin">
+                <div class="d-flex justify-content-between flex-wrap">
+                  <div class="d-flex align-items-end flex-wrap">
+                    <div class="mr-md-3 mr-xl-5">
+                      <h2>Pengujian,</h2>
+                      <p class="mb-md-0">berikut ini adalah halaman untuk melakukan operasi pengujian dengan metode validasi k-fold validation,</p>
+                    </div>
+                    
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+            <div class="row d-flex" id="proBanner">
+              
+            </div>
+            <div class="row">
+              <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body dashboard-tabs p-3">
+                    <div style="display:flex;flex-direction: row;">
+                      <form style="margin-bottom:25px" action="pengujian" method="POST">
+                        <button type="submit" id="btnPraproses" class="btn btn-secondary" data-toggle="modal" data-target="#tambahpenggunaModal">
+                        Pengujian
+                        </button>    
+                      </form>  
+                      {%if show%}
+                      <form style="margin-left:10px">
+                        <button type="button"  class="btn btn-primary" data-toggle="modal" data-target="#tambahpenggunaModal">
+                          Confusion Matrix
+                          </button>     
+                      </form> 
+                      {%endif%}
+                    </div>        
+                    {%if show%}
+                        {%for x in data%}
+                            <div style="margin-bottom:25px">
+                               <h3 style="margin-bottom:15px;margin-left:5px">Fold {{x[0]+1}}</h3>
+                               <table id="table-{{x[0]+1}}" style="margin-bottom:15px" class="table">
+                                <thead>
+                                  <tr>
+                                    <th>Tweet</th>
+                                    <th>Label</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for l in x[1]%}
+                                    <tr>
+                                      <td>{{l["corpus"]}}</td>
+                                      <td>{{l["label"]}}</td>
+                                    </tr>
+                                  {%endfor%}
+                                </tbody>
+                               </table>
+                            </div>
+                        {%endfor%}
+                    {%endif%}
+                    <form action="importdataset" id="formFile" style="display:none" method="POST" enctype="multipart/form-data">
+                      <input id="datasetFile" type="file" name="dataset">
+                    </form>
+                  </div>
+                </div>
+              </div>
+      
+      
+      
+            </div>
+            
+            
+          </div>
+  
+    
+          <!-- content-wrapper ends -->
+          <!-- partial:partials/_footer.html -->
+          <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+              <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © 2021</span>
+              
+            </div>
+          </footer>
+          <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+  
+    <!-- plugins:js -->
+    <script src="static/vendors/base/vendor.bundle.base.js"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page-->
+    <script src="static/vendors/chart.js/Chart.min.js"></script>
+    <script src="static/vendors/datatables.net/jquery.dataTables.js"></script>
+    <script src="static/vendors/datatables.net-bs4/dataTables.bootstrap4.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
+    <script>
+  
+      $('#table-1').bootstrapTable({
+        pagination:true,
+        height:300,
+  })
+  
+  $('#table-2').bootstrapTable({
+        pagination:true,
+        height:300,
+  })
+
+  $('#table-3').bootstrapTable({
+        pagination:true,
+        height:300,
+  })
+
+  $('#table-4').bootstrapTable({
+        pagination:true,
+        height:300,
+  })
+    </script>
+    <script>
+  
+        // $(document).on("click","#btnPraproses",(e)=>{
+        //     alert("123");
+        // })
+  
+    </script>
+    <!-- End plugin js for this page-->
+    <!-- inject:js -->
+    <script src="static/js/off-canvas.js"></script>
+    <script src="static/js/hoverable-collapse.js"></script>
+    <script src="static/js/template.js"></script>
+    <!-- endinject -->
+    <!-- Custom js for this page-->
+    <script src="static/js/dashboard.js"></script>
+    <script src="static/js/data-table.js"></script>
+    <script src="static/js/jquery.dataTables.js"></script>
+    <script src="static/js/dataTables.bootstrap4.js"></script>
+    <!-- End custom js for this page-->
+    <script src="static/js/jquery.cookie.js" type="text/javascript"></script>
+  
+  
+  
+  </body></html>
