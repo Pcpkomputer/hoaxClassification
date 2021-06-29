@@ -25,7 +25,7 @@
         <div style="margin-left:15px" class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">  
           <a style="font-size:1em" class="navbar-brand brand-logo" href="index.html">Klasifikasi Berita Hoax
 </a>
-          <a class="navbar-brand brand-logo-mini" style="font-size:13px" href="index.html">SAW</a>
+          <a class="navbar-brand brand-logo-mini" style="font-size:13px" href="index.html">...</a>
           <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
             <span class="mdi mdi-sort-variant"></span>
           </button>
@@ -86,10 +86,13 @@
             <div class="col-md-12 grid-margin stretch-card">
               <div class="card">
                 <div class="card-body dashboard-tabs p-3">
-                  <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#tambahpenggunaModal">
+                  <button type="button" id="btnUploadDataset" class="btn btn-secondary" data-toggle="modal" data-target="#tambahpenggunaModal">
                     Import Dataset
                   </button>                  
                   <table id="table"></table>
+                  <form action="importdataset" id="formFile" style="display:none" method="POST" enctype="multipart/form-data">
+                    <input id="datasetFile" type="file" name="dataset">
+                  </form>
                 </div>
               </div>
             </div>
@@ -128,29 +131,18 @@
   <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
   <script>
 
-    let data = {{ data | safe}}
+    let data = {{data | safe}};
 
     $('#table').bootstrapTable({
       search:true,
       pagination:true,
       height:500,
   columns: [{
-    field: 'id',
-    title: 'ID Pengguna'
+    field: 'tweet',
+    title: 'Tweet'
   }, {
-    field: 'nama',
-    title: 'Nama'
-  }, {
-    field: 'email',
-    title: 'Email'
-  },
-  {
-    field: 'password',
-    title: 'Password'
-  },
-  {
-    field: 'role',
-    title: 'Role'
+    field: 'label',
+    title: 'Label'
   },
   {
     field: 'aksi',
@@ -158,9 +150,6 @@
     formatter:(_,value, i)=>{
         return `
         <div style="flex-direction:row;display:flex">
-        <form>
-        <button id="btnUbahPengguna" data-index="${value.id}" data-id="${value.id}" type="button" class="btn btn-primary">Ubah</button>
-        </form>
         <form action="" method="POST">
         <input type="hidden" name="_method" value="DELETE" /> 
         <input type="hidden" name="id" value="${value.id}" /> 
@@ -173,28 +162,25 @@
 })
   </script>
   <script>
-      $(document).on("click","#btnUbahPengguna",(e)=>{
-         $("#ubahpenggunaModal").modal();
 
-         let value = data.filter((item,_)=>{
-          return item.id===parseInt(e.currentTarget.getAttribute("data-index")); 
-        });
+      $(document).on("change","#datasetFile",(e)=>{
+          let target = e.target;
+          if(e.target.files.length>0){
+            let files = e.target.files[0];
+            if(files.name.match(/\.xlsx$/)){
+              document.querySelector("#formFile").submit();
+            }
+            else{
+              document.querySelector("#datasetFile").value="";
+              document.querySelector("#datasetFile").files=null;
+              alert("File yang diupload harus bertipe data .xlsx");
+            }
+          }
+          
+      })
 
-        value = value[0];
-
-        let id = value.id;
-        let nama = value.nama;
-        let email = value.email;
-        let password = value.password;
-        let role = value.role;
-
-         document.querySelector("#readonlyDataPengguna").value=id;
-         
-         document.querySelector("#putNama").value = nama;
-         document.querySelector("#putemail").value = email;
-         document.querySelector("#putPassword").value = password;
-         document.querySelector("#putRole").value = role;
-         
+      $(document).on("click","#btnUploadDataset",()=>{
+          document.querySelector("#datasetFile").click();
       })
   </script>
   <!-- End plugin js for this page-->
