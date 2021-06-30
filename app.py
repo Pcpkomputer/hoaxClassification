@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, session
 from sklearn.naive_bayes import MultinomialNB
 import pandas as pd
 import json
@@ -13,6 +13,7 @@ from sklearn.metrics import classification_report,accuracy_score
 
 
 app = Flask(__name__)
+app.secret_key="iniadalahsecretkey"
 
 mydb = mysql.connector.connect(
   host="localhost",
@@ -21,12 +22,63 @@ mydb = mysql.connector.connect(
   database="hoaxnewsclassification"
 )
 
+@app.route("/logout", methods=["POST","GET"])
+def logout():
+    session.pop("login")
+    return redirect(url_for("login"))
+
+@app.route("/login", methods=["POST","GET"])
+def login():
+    if 'login' in session:
+        return redirect(url_for("index"))
+
+    if request.method=="POST":
+        email = request.form["email"]
+        password = request.form["password"]
+
+        mydb.connect()
+        cursor = mydb.cursor()
+
+        cursor.execute("SELECT * FROM user WHERE email=%s",(email,))
+        row = cursor.fetchone()
+
+        cursor.close()
+        mydb.close()
+
+        if row==None:
+            return render_template("Login.html",error="Tidak ditemukan user tersebut")
+        else:
+            e = row[1]
+            p = row[2]
+
+            if p==password and e==email:
+                session["login"]=True
+                return redirect(url_for("index"))
+            else:
+                return render_template("Login.html",error="Login gagal")
+
+    return render_template("Login.html")
+
 @app.route("/")
 def index():
-    return render_template("Dashboard.html")
+    if 'login' not in session:
+        return redirect(url_for("login"))
+
+    mydb.connect()
+    cursor = mydb.cursor()
+
+    cursor.execute("SELECT COUNT(*) AS jumlahdataset FROM dataset")
+    jumlahdataset = cursor.fetchone()
+
+    cursor.close()
+    mydb.close()
+
+    return render_template("Dashboard.html", jumlahdataset=jumlahdataset[0])
 
 @app.route("/preprocessing",methods=["POST","GET"])
 def preprocessing():
+    if 'login' not in session:
+        return redirect(url_for("login"))
     if request.method=="POST":
         
         mydb.connect()
@@ -123,6 +175,8 @@ def preprocessing():
 
 @app.route("/dataset")
 def dataset():
+    if 'login' not in session:
+        return redirect(url_for("login"))
 
     mydb.connect()
     cursor = mydb.cursor()
@@ -147,7 +201,8 @@ def dataset():
 
 @app.route("/pengujian", methods=["POST","GET"])
 def pengujian():
-    
+    if 'login' not in session:
+        return redirect(url_for("login"))
     if request.method=="POST":
         mydb.connect()
         cursor = mydb.cursor()
@@ -224,7 +279,8 @@ def pengujian():
 
 @app.route("/importdataset", methods=["POST"])
 def importdataset():
-    
+    if 'login' not in session:
+        return redirect(url_for("login"))
     dataset = request.files["dataset"]
 
     document = pd.read_excel(dataset)
