@@ -18,6 +18,50 @@
   <style type="text/css">/* Chart.js */
   @keyframes chartjs-render-animation{from{opacity:.99}to{opacity:1}}.chartjs-render-monitor{animation:chartjs-render-animation 1ms}.chartjs-size-monitor,.chartjs-size-monitor-expand,.chartjs-size-monitor-shrink{position:absolute;direction:ltr;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1}.chartjs-size-monitor-expand>div{position:absolute;width:1000000px;height:1000000px;left:0;top:0}.chartjs-size-monitor-shrink>div{position:absolute;width:200%;height:200%;left:0;top:0}</style></head>
   <body>
+
+        <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Confusion Matrix</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+             {%for i,x in confusion%}
+             <div style="margin-bottom:35px">
+              <h3>Fold {{i+1}}</h3>
+              <div style="margin-bottom:15px">Akurasi : {{akurasi[i]}}</div>
+              <table class="table table-bordered">
+                  <tr>
+                    <th></th>
+                    <th>Valid</th>
+                    <th>Hoax</th>
+                  </tr>
+                  <tr>
+                    <td>Valid</td>
+                    <td>{{x["tp"]}}</td>
+                    <td>{{x["fp"]}}</td>
+                  </tr>
+                  <tr>
+                    <td>Hoax</td>
+                    <td>{{x["fn"]}}</td>
+                    <td>{{x["tn"]}}</td>
+                  </tr>
+              </table>
+            </div> 
+            {%endfor%}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <div class="container-scroller">
       <!-- partial:partials/_navbar.html -->
       <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
@@ -94,7 +138,7 @@
                       </form>  
                       {%if show%}
                       <form style="margin-left:10px">
-                        <button type="button"  class="btn btn-primary" data-toggle="modal" data-target="#tambahpenggunaModal">
+                        <button type="button"   data-toggle="modal" data-target="#exampleModal" class="btn btn-primary">
                           Confusion Matrix
                           </button>     
                       </form> 
@@ -109,6 +153,7 @@
                                   <tr>
                                     <th>Tweet</th>
                                     <th>Label</th>
+                                    <th>Actual</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -116,6 +161,7 @@
                                     <tr>
                                       <td>{{l["corpus"]}}</td>
                                       <td>{{l["label"]}}</td>
+                                      <td>{{l["actual"]}}</td>
                                     </tr>
                                   {%endfor%}
                                 </tbody>

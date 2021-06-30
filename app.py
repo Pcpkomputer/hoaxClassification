@@ -3,11 +3,14 @@ from sklearn.naive_bayes import MultinomialNB
 import pandas as pd
 import json
 import mysql.connector
+from sklearn.metrics import confusion_matrix
 import re
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import KFold
 import numpy as np
+from sklearn.metrics import classification_report,accuracy_score
+
 
 app = Flask(__name__)
 
@@ -165,6 +168,8 @@ def pengujian():
         kf.get_n_splits(X)
 
         payload = []
+        payload_confusion = []
+        payload_akurasi = []
 
         for train_index, test_index in kf.split(X):
             print("TRAIN:", train_index, "TEST:", test_index)
@@ -181,24 +186,38 @@ def pengujian():
             corp = X_test_raw
             pred = predicted
 
+            confusion = confusion_matrix(y_test,pred, labels=["hoax","valid"])
+            akurasi = accuracy_score(y_test,pred)
 
-            zipped = list(zip(corp,pred))
+            payload_akurasi.append(str(int(akurasi*100))+"%")
+
+            tn, fp, fn, tp = confusion.ravel()
+
+            payload_confusion.append({
+                "tn":tn,
+                "fp":fp,
+                "fn":fn,
+                "tp":tp
+            })
+
+            zipped = list(zip(corp,pred,y_test))
 
             p = []
 
             for l in zipped:
                 p.append({
                     "corpus":l[0],
-                    "label":l[1]
+                    "label":l[1],
+                    "actual":l[2]
                 })
             payload.append(p)
 
-        print(list(enumerate(payload)))
+        print(payload_akurasi)
 
         cursor.close()
         mydb.close()
 
-        return render_template("Pengujian.html",show=True,data=list(enumerate(payload)))
+        return render_template("Pengujian.html",show=True,confusion=list(enumerate(payload_confusion)),akurasi=payload_akurasi,data=list(enumerate(payload)))
 
     return render_template("Pengujian.html")
 
