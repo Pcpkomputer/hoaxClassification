@@ -80,11 +80,27 @@ def preprocessing():
     if 'login' not in session:
         return redirect(url_for("login"))
     if request.method=="POST":
+
+        if "_method" in request.form and request.form["_method"]=="DELETE":
+            id = request.form["id"]
+
+            mydb.connect()
+
+            cursor = mydb.cursor()
+            cursor.execute("DELETE FROM preprocessing WHERE id=%s",(id,))
+            mydb.commit()
+
+            cursor.close()
+            mydb.close()
+
+            return redirect(url_for("preprocessing"))
+
         
         mydb.connect()
         cursor = mydb.cursor()
 
         cursor.execute("SELECT * FROM dataset")
+        
         
         rows = cursor.fetchall()
 
@@ -162,6 +178,7 @@ def preprocessing():
 
     for index,x in enumerate(rows):
         payload.append({
+            "id":x[0],
             "no":x[0],
             "tweetsebelum":x[1],
             "tweetsesudah":x[2],
@@ -173,10 +190,25 @@ def preprocessing():
 
     return render_template("Preprocessing.html",data=json.dumps(payload))
 
-@app.route("/dataset")
+@app.route("/dataset", methods=["POST","GET"])
 def dataset():
     if 'login' not in session:
         return redirect(url_for("login"))
+
+    if request.method=="POST":
+        if request.form["_method"]=="DELETE":
+            id = request.form["id"]
+
+            mydb.connect()
+
+            cursor = mydb.cursor()
+            cursor.execute("DELETE FROM dataset WHERE id=%s",(id,))
+            mydb.commit()
+
+            cursor.close()
+            mydb.close()
+
+            return redirect(url_for("dataset"))
 
     mydb.connect()
     cursor = mydb.cursor()
@@ -192,7 +224,7 @@ def dataset():
 
     for index,x in enumerate(rows):
         data.append({
-            "id":index+1,
+            "id":x[0],
             "tweet":x[1],
             "label":x[2]
         })
